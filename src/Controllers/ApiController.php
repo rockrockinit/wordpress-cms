@@ -11,7 +11,6 @@ namespace WordPress\CMS\Controllers;
 use WordPress\CMS\DB\Database;
 use WordPress\CMS\DB\Grants;
 use WordPress\CMS\DB\Table;
-use WordPress\CMS\Models\Classes;
 
 /**
  * This controller is different from the others in that it is not called via the
@@ -87,8 +86,11 @@ class ApiController extends ControllerBase {
       $tbl->page($page);
 
       $tbl->get_records(true, true, $search);
+
+      $records = $this->wpdb->last_result;
+
       $out['successes'][] = (object) [
-        'records' => $this->wpdb->last_result,
+        'records' => $records,
         'page' => $tbl->page(),
         'pages' => $tbl->get_page_count(),
         'count' => $tbl->get_records_per_page(),

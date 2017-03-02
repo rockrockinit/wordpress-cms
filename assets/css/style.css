@@ -1,6 +1,17 @@
 .nowrap {
     white-space: nowrap !important;
 }
+.cms-ids .ui-sortable-handle {
+    cursor: move;
+}
+.cms-ids .ui-sortable-helper {
+    width: auto !important;
+}
+.cms-ids .ui-sortable-helper,
+.cms-ids .ui-sortable-helper td {
+    border: none !important;
+    background: #fffeda !important;
+}
 form.cms-filters td { vertical-align:top }
 form.cms-filters td.label { text-align:right }
 

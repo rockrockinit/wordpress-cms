@@ -61,6 +61,39 @@ $(function ($) {
         });
     });
 
+    //Make diagnosis table sortable
+	if ($.fn.sortable) {
+        $(".cms-ids .table-items > tbody").sortable({
+            classes: {
+                'ui-sortable-helper': 'cms-ids-helper'
+            },
+            helper: function (e, tr) {
+                var $originals = tr.children(),
+                    $helper = tr.clone();
+
+                $helper.children().each(function (index) {
+                    $(this).width($originals.eq(index).width());
+                });
+
+                return $helper;
+            },
+			beforeStop: function () {
+            	console.log($(this).parent().html());
+			},
+            stop: function (event, ui) {
+            	var $component = $(this).closest('.cms-ids'),
+					$table = $('.table-items', $component),
+					ids = [];
+
+            	$('tbody [data-id]', $table).each(function () {
+            		ids.push($(this).data('id'));
+				});
+
+            	$('.ids', $component).val(ids.join(','));
+            }
+        }).disableSelection();
+    }
+
 	/**
 	 * Data entry helpers.
 	 */

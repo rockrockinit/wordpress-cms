@@ -286,8 +286,12 @@ class Record {
 
         $rows = $database->get_wpdb()->get_results($sql);
 
-        foreach ($rows as $row) {
-          $records[] = new Record($table, $row);
+        foreach ($ids as $id) {
+          foreach ($rows as $row) {
+            if ($row->id == $id) {
+              $records[] = new Record($table, $row);
+            }
+          }
         }
       }
     }
