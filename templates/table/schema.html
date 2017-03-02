@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+
+<form action="{{table.get_url('save', false, 'schema')}}" method="post" class="cms-schema">
+
+	<p><input type="text" id="new_name" name="new_name" value="{{table.get_name}}" class="schema-identifier schema-name" required /></p>
+
+	{#<input type="text" id="new_comment" name="new_comment" value="{{table.get_comment}}" size="120" />#}
+
+
+	<table class="table table-striped column-definitions">
+		<thead>
+			<tr>
+				<th>Order</th>
+				<th><abbr title="Primary Key">PK</abbr></th>
+				<th>Increment</th>
+				<th>Name</th>
+				<th><abbr title="Can this column be null?">Null</abbr></th>
+				<th>Unique</th>
+				<th>Type</th>
+				<th>Size</th>
+				{#<th>Reference Table</th>#}
+				{#<th>Comment</th>#}
+			</tr>
+		</thead>
+		<tbody>
+			{% for col in table.get_columns %}
+			<tr class="column-definition" data-column-name="{{col.get_name}}">
+				<td class="reorder">
+					<a class="move move-up" href="javascript:void(0);" title="Move up">
+						<span class="dashicons dashicons-arrow-up-alt"></span>
+					</a>
+					<a class="move move-down" href="javascript:void(0);" title="Move down">
+						<span class="dashicons dashicons-arrow-down-alt"></span>
+					</a>
+				</td>
+				<td class="primary-key">
+					{% if col.get_name == table.get_pk_column.get_name %}<span class="dashicons dashicons-yes"></span>{% endif %}
+				</td>
+				<td class="auto-increment">
+					<input type="radio" name="auto_increment" value="{{col.get_name}}" {% if col.is_auto_increment %}checked{% endif %} />
+				</td>
+				<td>
+					<input type="hidden" name="columns[{{col.get_name}}][old_name]" value="{{col.get_name}}" />
+					<input type="text" name="columns[{{col.get_name}}][new_name]" value="{{col.get_name}}" class="schema-identifier" required />
+				</td>
+				<td class="nullable">
+					<input type="checkbox" name="columns[{{col.get_name}}][nullable]" value="1" {% if col.nullable %}checked{% endif %} />
+				</td>
+				<td class="unique">
+					<input type="checkbox" name="columns[{{col.get_name}}][unique]" value="1" {% if col.is_unique %}checked{% endif %} />
+				</td>
+				<td>
+					<select name="columns[{{col.get_name}}][xtype]" required>
+						<option></option>
+						{% for xtype in xtypes %}
+						<option {% if col.get_xtype.name == xtype.name %}selected{% endif %} value="{{xtype.name}}">
+							{{xtype.title}}
+						</option>
+						{% endfor %}
+					</select>
+				</td>
+				<td>
+					{% if col.get_options %}
+						{% set value = '' %}
+						{% for option in col.get_options %}
+							{% if value == '' %}
+								{% set value = option %}
+							{% else %}
+								{% set value = value ~ ',' ~ option %}
+							{% endif %}
+						{% endfor %}
+
+						<input type="text" name="columns[{{col.get_name}}][size]" value="{{value}}" size="30" />
+					{% else %}
+						<input type="text" name="columns[{{col.get_name}}][size]" value="{{col.get_size}}" size="6" />
+					{% endif %}
+				</td>
+
+				{#
+				<td>
+					<select name="columns[{{col.get_name}}][target_table]">
+						<option></option>
+						{% for t in tables %}
+						<option value="{{t.get_name}}" {% if col.get_referenced_table == t %}selected{% endif %}>
+							{{t.get_name}}
+						</option>
+						{% endfor %}
+					</select>
+				</td>
+
+				<td>
+					<input type="text" name="columns[{{col.get_name}}][comment]" value="{{col.get_comment}}" />
+				</td>
+				#}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<div class="text-center">
+		<br />
+		<button type="submit" class="btn btn-success">Save</button>&nbsp;
+		<button type="button" class="btn btn-info btn-add-column" href="javascript:void(0);">
+			<span class="glyphicon glyphicon-plus"></span>
+			<span class="hidden-xs">&nbsp;Add Column</span>
+		</button>
+		<!--
+		<input type="submit" name="delete" value="Delete this table" class="button button-cancel" />
+		-->
+	</div>
+</form>
+
+{% endblock %}

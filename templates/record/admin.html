@@ -1,0 +1,200 @@
+{%extends "base.html"%}
+
+{% block content %}
+
+<form method="post" action="{{record.get_url('save')}}" class="cms-record">
+	{{wp_nonce_field('cms-record-'~record.get_primary_key())|raw}}
+
+	<table class="table table-add">
+		{% for column in table.get_columns %}
+			<tr class="column-type-{{column.get_type}}">
+				<td class="column-title">
+					<label for="{{column.get_name}}" class="right inline">
+							{{column.get_title}}{% if column.is_required and not column.is_auto_increment %}<span class="require">*</span>{% endif %}
+					</label>
+				</td>
+				<td width="100%" class="form-field form-required">
+					{% include 'field/edit.html' %}
+				</td>
+			</tr>
+		{% endfor %}
+
+		<tr>
+			<td></td>
+			<td colspan="2">
+				<!--
+				<p><label class="require">* An asterisk denotes a required field.</label></p>
+				-->
+				<p>
+					<!--
+					Describe the changes you've made:
+					<input type="text" name="changeset_comment" />
+					-->
+
+					<button type="submit" class="btn btn-success">Save</button>
+
+					{% if return_to %}
+						<input type="hidden" name="return_to" value="{{return_to}}" />
+						<a href="{{return_to}}" class="button">Cancel</a>
+					{% endif %}
+
+					{% if record.get_primary_key() %}
+						<input type="hidden" name="primary_key_value" value="{{record.get_primary_key()}}" />
+						<a href="{{record.get_url('delete')}}" class="btn btn-default">Delete</a>
+					{% endif %}
+				</p>
+			</td>
+		</tr>
+	</table>
+</form>
+
+{% if 0 and record.get_primary_key %}
+<div class="metabox-holder columns-1"><div class="postbox-container record-meta">
+
+	{% for refinfo in table.get_referencing_tables %}
+	<div class="postbox related-records">
+		{% set return_to = record.get_url()~'#related-'~refinfo.table.get_name() %}
+		<div class="handlediv" title="Click to toggle"><br /></div>
+		<h3 class="hndle" id="related-{{refinfo.table.get_name()}}">
+			<span>
+				{{refinfo.table.get_title}} &mdash; related records
+				(as <em>{{refinfo.column|titlecase}}</em>)
+				<a href="{{refinfo.table.get_url('index', {'filter[0][column]':refinfo.column,'filter[0][operator]':'=','filter[0][value]':record.get_title()})}}"
+				   class="button button-small">
+					View all
+				</a>
+				<a href="{{refinfo.table.get_url('export', {'filter[0][column]':refinfo.column,'filter[0][operator]':'=','filter[0][value]':record.get_title()})}}"
+				   class="button button-small" title="Export related records to Comma Separated Values format">
+					CSV of all
+				</a>
+				{% set defaults_key = 'defaults['~refinfo.column~']' %}
+				<a href="{{refinfo.table.get_url('index', {(defaults_key):record.get_primary_key(), ident:'', return_to:return_to}, 'record')}}"
+				   class="button button-small">
+					Add record
+				</a>
+			</span>
+		</h3>
+		<div class="inside">
+		{% include 'data_table.html' with { links:true, sortable:false, table:refinfo.table, records:record.get_referencing_records(refinfo.table,refinfo.column), return_to:return_to } %}
+		</div>
+	</div>
+	{% endfor %}
+
+	{% if table.has_changes_recorded %}
+	<div class="postbox closed">
+		<div class="handlediv" title="Click to toggle"><br /></div>
+		<h3 class="hndle"><span>History</span></h3>
+		<div class="inside">
+			<p>Recent changes made to this record.</p>
+			<table class="cms-change-tracker">
+				<thead>
+					<tr>
+						<th>Date and Time</th>
+						<th>Field</th>
+						<th>Old Value</th>
+						<th></th>
+						<th>New Value</th>
+						<th>User</th>
+						<th>Comment</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for change in record.get_changes %}
+					<tr>
+						<td>
+							<a href="admin.php?page=cms&controller=table&action=index&table={{wpdb_prefix}}cms_changesets&filter[0][column]=date_and_time&filter[0][operator]=%3D&filter[0][value]={{change.date_and_time}}">
+							{{change.date_and_time|get_date_from_gmt|wp_date_format}}
+							{{change.date_and_time|get_date_from_gmt|wp_time_format}}
+							</a>
+						</td>
+						<td>{{change.column_name|titlecase}}</td>
+						<td class="value">{{change.old_value}}</td>
+						<td>&rArr;</td>
+						<td class="value">{{change.new_value}}</td>
+						<td>{{change.user_nicename}}</td>
+						<td><em>{{change.comment}}</em></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+</div></div><!-- .postbox-container -->
+{% endif %}
+
+<script type="text/html" id="tmpl-btn-remove">
+	<button type="button" class="btn btn-sm btn-danger btn-remove">
+		<span class="glyphicon glyphicon-minus"></span>
+	</button>
+</script>
+
+<div id="modal-cms-ids" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Add Items</h4>
+			</div>
+			<div class="modal-body">
+				<div class="search">
+					<input type="text" name="search" class="form-control" autocomplete="off" v-on:keyup.enter="doSearch" />&nbsp;
+					<button type="button" class="btn btn-info btn-search" v-on:click="doSearch">
+						<span class="glyphicon glyphicon-search"></span>
+						<span class="hidden-xs">Search</span>
+					</button>
+				</div>
+
+				<div class="text-center section-forms" v-if="!loading && typeof records !== 'undefined' && records.length">
+					<div class="pagination-pages-wrap">
+						<ul class="pagination pagination-pages">
+							<li class="prev-next prev"><a>&laquo;</a></li>
+							<li class="prev-next next"><a>&raquo;</a></li>
+						</ul>
+					</div>
+					<br />
+				</div>
+
+				<div class="results">
+					<div class="status-loading" v-if="loading">
+						<div class="loading">
+							<div class="animation"></div>
+							<div class="message">
+								Searching...
+							</div>
+						</div>
+					</div>
+					<div class="status-no-results" v-else-if="!loading && typeof records !== 'undefined' && !records.length">
+						No records were found!
+					</div>
+					<div class="status-results" v-else-if="!loading && typeof records !== 'undefined' && records.length">
+						<table class="table table-striped table-records">
+							<tbody>
+							<tr v-for="(record, index) in records">
+								<td>
+									<input type="checkbox" name="forms" :value="record.id" />
+								</td>
+								<template v-for="(column, index2) in columns">
+									<td v-if="index2 < 2" class="nowrap">
+										${ getValue(record[column]) }
+									</td>
+								</template>
+								<td width="100%"></td>
+							</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="text-center" v-if="!loading && typeof records !== 'undefined' && records.length">
+					<br />
+					<button type="button" class="btn btn-info btn-import-selected" v-on:click="addSelected">Add Selected</button>
+					<br />
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% if not records %}
+	<div class="no-records">
+		No records found.
+	</div>
+{% else %}
+	<table class='table table-striped'>
+		<thead>
+			<tr>
+				<!-- @todo Limit this to specific fields -->
+				{% set count = 0 %}
+				{% for column in table.get_columns %}
+					{% if column.get_type != 'text' %}
+						{% set count = count + 1 %}
+						{% if count <= 4 %}
+							<th {% if sortable %}class="sortable"{% endif %}>
+								{{column.get_title}}
+							</th>
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+				<th class="actions">
+					{{table.count_records|number_format}} record{% if record_count != 1 %}s{% endif %}
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for record in records %}
+			<tr>
+				{% set count = 0 %}
+				{% for column in table.get_columns %}
+					{% if column.get_type != 'text' %}
+						{% set count = count + 1 %}
+						{% if count <= 4 %}
+							<td class="type-{{column.get_type()}} {% if column.is_foreign_key %}is-foreign-key{% endif %}">
+								{% include 'field/view.html' %}
+							</td>
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+				<td class="actions">
+					{% if links and table.is_updatable %}
+						<a href="{{ record.get_url('index',true,{return_to:return_to}) }}" class="btn btn-sm btn-info">
+							<span class="glyphicon glyphicon-pencil"></span>
+							<span class="hidden-xs">&nbsp;Edit</span>
+						</a>
+						<a href="{{record.get_url('delete')}}" class="btn btn-sm btn-danger">
+							<span class="glyphicon glyphicon-trash"></span>
+							<span class="hidden-xs">&nbsp;Delete</span>
+						</a>
+					{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endif %}

@@ -1,0 +1,59 @@
+{% if records %}
+<br />
+
+<table width="100%">
+
+	{% for fid,filter in table.get_filters(true) %}
+	<tr class="cms-filter form-inline">
+		<td class="text-center">
+				<select name="filter[{{fid}}][column]" class="form-control">
+					{% for column in table.get_columns %}
+						<option value="{{column.get_name}}" {% if column.get_name==filter.column %}selected{% endif %}>
+							{{column.get_title}}
+						</option>
+					{% endfor %}
+				</select>
+
+				<br class="visible-xs" />
+
+				<select name="filter[{{fid}}][operator]" class="form-control">
+					{% for op,name in table.get_operators %}
+						<option value="{{op}}" {% if op==filter.operator %}selected{% endif %}>
+							{{name}}
+						</option>
+					{% endfor %}
+				</select>
+
+				<br class="visible-xs" />
+
+				{% if filter.operator == 'in' or filter.operator == 'not in' %}
+					<textarea name="filter[{{fid}}][value]" class="form-control">{{filter.value}}</textarea>
+				{% else %}
+					<input type="text" name="filter[{{fid}}][value]" value="{{filter.value}}" class="form-control" size="35" />
+				{% endif %}
+
+				{% if filter.operator == 'in' or filter.operator == 'not in' %}
+					<input type="hidden" name="notfound" value="{{fid}}" />
+					Check if any of these {{filter.values|length}} values not found:<br />
+					<button class="button btn btn-default" data-controller="table" data-action="notfound">Download CSV</button>
+				{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
+
+	<tr>
+		<td class="text-center buttons">
+			<br />
+
+			<button class="btn btn-success" data-controller="table" data-action="index">
+				<span class="glyphicon glyphicon-search"></span>
+				<span class="hidden-xs">&nbsp;Search</span>
+			</button>
+
+			{% if table.get_filters > 1 %}
+				<a href="{{clear_url}}" class="btn btn-default">Clear<span class="hidden-xs"> Filters</span></a>
+			{% endif %}
+		</td>
+	</tr>
+</table>
+{% endif %}

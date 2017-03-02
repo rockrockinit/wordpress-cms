@@ -1,0 +1,267 @@
+h1 {
+    font-size: 25px !important;
+    font-weight: normal !important;
+}
+.require {
+    color: red;
+    font-weight: bold;
+}
+.red {
+    color: red;
+}
+.hidden-all {
+    display: none;
+}
+.table th {
+    background: #337ab7;
+    padding: 10px !important;
+    color: #fff;
+    font-size: 15px;
+    font-weight: normal;
+    border-bottom: none;
+}
+.table > tbody > tr > td {
+    font-size: 14px;
+}
+.table th.actions,
+.table td.actions {
+    text-align: right;
+    white-space: nowrap;
+    max-width: 200px;
+}
+.table-add {
+    max-width: 900px !important;
+    margin: auto;
+    margin-top: 40px;
+}
+.table-add > tbody > tr > td {
+    border-top: none !important;
+}
+.table-add > tbody > tr > td:first-child {
+    text-align: right;
+    white-space: nowrap;
+}
+.schema-name {
+    width: 100%;
+    font-size: 30px !important;
+    background: transparent !important;
+    border: 0px !important;
+    box-shadow: none !important;
+}
+.no-records {
+    text-align: center;
+    padding: 20px;
+    font-size: 20px;
+    color: red;
+}
+.form-field input[type=text], .form-field input[type=password], .form-field input[type=email], .form-field input[type=number], .form-field input[type=search], .form-field input[type=tel], .form-field input[type=url], .form-field textarea {
+    width: 100%;
+}
+.go-back {
+    float: right;
+    padding-top: 20px;
+}
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 0px !important;
+    margin-bottom: 10px;
+}
+.confirm {
+    margin: auto;
+    max-width: 400px;
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #CCC;
+    border-radius: 10px;
+    background: #f5f5f5;
+}
+
+/* Bootstrap Nav Overrides
+-------------------------------------------*/
+.nav-main {
+    margin: 0px;
+    margin-bottom: 30px !important;
+}
+
+.nav-main {
+    border-bottom: 1px solid #337ab7 !important;
+}
+
+.nav-main>li.active>a,
+.nav-main>li.active>a:hover,
+.nav-main>li.active>a:focus {
+    cursor: pointer;
+    background-color: #337ab7 !important;
+    border-color: #337ab7 !important;
+    color: #FFF !important;
+    border-bottom: 1px solid #337ab7 !important;
+}
+
+.nav-main>li>a,
+.nav-main>li>a:hover {
+    cursor: pointer;
+    background: #DDD;
+    color: #000;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid #BBB !important;
+    border-bottom: 1px solid #337ab7 !important;
+}
+
+.nav-main>li>a {
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    margin: 0px !important;
+    margin-right: 4px !important;
+}
+
+/* cms-ids
+-------------------------------------------*/
+.cms-ids {
+    border: 1px solid #337ab7;
+}
+.cms-ids .table {
+    margin: 0px;
+}
+.cms-ids .no-records td {
+    height: 60px;
+    background: #FFF;
+}
+
+.modal .status-hint {
+    text-align: center;
+    color: #888;
+}
+.modal .status-no-results {
+    text-align: center;
+    color: red;
+}
+.modal .status-loading {
+    text-align: center;
+    padding: 30px;
+}
+.modal .links-sm {
+    font-size: 11px;
+}
+.modal .status-results .glyphicon-ok-sign {
+    color: #5cb85c
+}
+
+/* Wufoo Search
+-------------------------------------------*/
+.modal .search {
+    background-color: #FFF;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.modal .search input {
+    display: inline;
+    max-width: 250px !important;
+}
+.modal .search select {
+    display: inline;
+    max-width: 160px !important;
+}
+.modal .results {
+    max-height: 300px;
+    overflow: auto;
+    border: 0px solid #BBB;
+}
+
+/* Pagination
+-------------------------------------------*/
+.modal .pagination {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.modal .pagination li {
+    display: inline;
+}
+.modal .pagination a {
+    font-size: 14px;
+    border: 0px !important;
+    padding: 0px 7px !important;
+}
+.modal .pagination a:hover {
+    background: #FFFBD3;
+    background: transparent !important;
+    text-decoration: underline;
+}
+.modal .pagination li.selected a,
+.modal .pagination li.selected a:hover {
+    background: #FFFBD3;
+    background: transparent !important;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.modal .pagination .etc a,
+.modal .pagination .etc a:hover {
+    text-decoration: none !important;
+}
+.modal .pagination>.disabled>span,
+.modal .pagination>.disabled>span:hover,
+.modal .pagination>.disabled>span:focus,
+.modal .pagination>.disabled>a,
+.modal .pagination>.disabled>a:hover,
+.modal .pagination>.disabled>a:focus {
+    border: 0px !important;
+    padding: 0px 7px !important;
+}
+.modal .pagination-pages-wrap {
+    text-align: center;
+    margin: 0px auto;
+}
+
+/* Loading
+-------------------------------------------*/
+.loading .animation {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    border: 5px solid rgba(139, 175, 217, 0.3);
+    border-radius: 50%;
+    border-top-color: #4f94c6;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+    margin-bottom: 15px;
+}
+
+.loading .message {
+    font-size: 16px;
+    color: slategray;
+}
+
+@keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+
+/* Bootstrap Overrides
+-------------------------------------------*/
+.modal {
+    text-align: left;
+}
+.modal li {
+    padding-bottom: 10px;
+}
+.modal-header {
+    background: #337ab7;
+    color: #FFF;
+}
+.modal-header h4 {
+    font-size: 18px;
+    font-weight: normal;
+}
+.modal-header h4 .caption {
+    color: #92d2ff;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 15px;
+}

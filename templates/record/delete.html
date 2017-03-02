@@ -1,0 +1,41 @@
+<div class="cms wrap bootstrap-wrapper" style="display:none;">
+	<div class="row">
+		<div class="col-xs-10 col-xs-offset-1">
+			<div class="confirm">
+
+				<h1>Confirm Delete</h1>
+
+				<p>You are about to delete the following record:</p>
+
+				{% set count = 0 %}
+				{% for column in table.get_columns %}
+					{% set value = attribute(record, column.get_name) %}
+					{% if column.get_type != 'text' and value != '' %}
+						{% set count = count + 1 %}
+						{% if count <= 5 %}
+							<strong>{{column.get_title}}:</strong> {{ value }}<br />
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+
+				<br />
+
+				<form action="{{record.get_url('delete')}}" method="post">
+					{{wp_nonce_field('cms-record-delete-'~record.get_primary_key())|raw}}
+					<p>
+						<input type="hidden" name="confirm_deletion" value="yes" />
+						<button type="submit" class="btn btn-danger">
+							<span class="glyphicon glyphicon-trash"></span>
+							<span>&nbsp;Delete</span>
+						</button>
+						&nbsp;
+						<a href="{{record.get_url()}}" class="btn btn-default">
+							<span class="glyphicon glyphicon-ban-circle"></span>
+							<span>&nbsp;Cancel</span>
+						</a>
+					</p>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

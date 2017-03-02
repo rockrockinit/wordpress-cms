@@ -1,0 +1,49 @@
+<div class="cms wrap bootstrap-wrapper" style="display:none;">
+	{% if query['controller'] %}
+		<div class="go-back">
+			<a href="?page={{ slug }}">Custom Data &raquo;</a>
+		</div>
+	{% endif %}
+
+	{% if table %}
+		<h1>{{table.get_title}}</h1>
+
+		<br />
+
+		<ul class="nav nav-tabs nav-main">
+			<li class="{{ query['controller']  == 'table' ? 'active' : '' }}">
+				<a href="{{table.get_url}}" class="nav-tab {% if controller=='table' %}nav-tab-active{% endif %}">
+					{{__('Manage', 'cms')}}
+				</a>
+			</li>
+
+			<li class="{{ query['controller']  == 'record' ? 'active' : '' }}">
+				<a href="{{record.get_url('index', false)}}"
+					 class="nav-tab {% if controller=='record' and not record.get_primary_key %}nav-tab-active{% endif %}">
+					{{__('Add', 'cms')}}
+				</a>
+			</li>
+
+			<!--
+			<a href="{{record.get_url}}" class="nav-tab {% if controller=='record' and record.get_primary_key %}nav-tab-active{% endif %}">
+				{{__('Edit', 'cms')}}
+			</a>
+
+			<a href="{{table.get_url('import')}}" class="nav-tab {% if action=='import' %}nav-tab-active{% endif %}">
+				{{__('Import', 'cms')}}
+			</a>
+			-->
+			{% if current_user_is_admin and user.user_login == 'erodriguez' %}
+				<li class="{{ query['controller']  == 'schema' ? 'active' : '' }}">
+					<a href="{{table.get_url('index', false, 'schema')}}" class="nav-tab {% if action=='structure' %}nav-tab-active{% endif %}">
+						{{__('Structure', 'cms')}}
+					</a>
+				</li>
+			{% endif %}
+		</ul>
+	{% endif %}
+
+	{% include 'notices.html' %}
+
+	{% block content %}{% endblock %}
+</div>

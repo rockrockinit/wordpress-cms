@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Custom Data</h1>
+
+{% if current_user_is_admin and user.user_login == 'erodriguez' %}
+<div class="text-center">
+	<form action="{{admin_url('admin.php?page=cms&controller=schema&action=newtable')}}" method="post">
+		<input type="text" name="new_table_name" id="new-table" class="form-control" placeholder="Item Name..." style="max-width:230px;display:inline;" />
+		<button class="btn btn-success">Add</button>
+	</form>
+	<br />
+</div>
+{% endif %}
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>Item</th>
+			<th class="text-center">Count</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for table in tables %}
+			<tr>
+				<td width="90%">{{ table.title }}</td>
+				<td width="10%" class="text-center">{{ table.count }}</td>
+				<td>
+					<a href="{{table.url}}" class="btn btn-sm btn-info">Manage</a>
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

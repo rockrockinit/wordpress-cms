@@ -1,0 +1,5 @@
+{% for notice in notices %}
+	<div class="alert alert-{% if notice.type=='error' %}danger{% else %}success{% endif %}" role="alert">
+		<p>{{notice.message}}</p>
+	</div>
+{% endfor %}
