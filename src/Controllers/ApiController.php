@@ -41,7 +41,7 @@ class ApiController extends ControllerBase {
 		) );
 
 		// Ex: /wp-json/cms/get/classes
-    register_rest_route( CMS_SLUG, '/get/(?P<table>[a-zA-Z0-9-_]+)(/page/(?P<page>\d+))?(/search/(?P<search>.*))?', array(
+    register_rest_route( CMS_SLUG, '/get/(?P<table>[a-zA-Z0-9-_]+)((/page/(?P<page>\d+))|(/count/(?P<count>\d+))|(/search/(?P<search>.*)))*', array(
       'methods' => 'GET',
       'callback' => array( $this, 'get' ),
     ) );
@@ -62,6 +62,7 @@ class ApiController extends ControllerBase {
 
     $name = $data['table'];
     $page = $data['page'];
+    $count = $data['count'];
 		$search = $data['search'];
 
     $page = $page ? $page : 1;
@@ -83,6 +84,10 @@ class ApiController extends ControllerBase {
       $db = new Database($this->wpdb);
       $tbl = new Table($db, $name);
 
+      if ($count) {
+        $tbl->set_records_per_page($count);
+      }
+
       $tbl->page($page);
 
       $tbl->get_records(true, true, $search);
@@ -91,9 +96,9 @@ class ApiController extends ControllerBase {
 
       $out['successes'][] = (object) [
         'records' => $records,
-        'page' => $tbl->page(),
-        'pages' => $tbl->get_page_count(),
-        'count' => $tbl->get_records_per_page(),
+        'page' => intval($tbl->page()),
+        'pages' => intval($tbl->get_page_count()),
+        'count' => intval($tbl->get_records_per_page()),
         'total' => intval($tbl->count_records())
       ];
     }

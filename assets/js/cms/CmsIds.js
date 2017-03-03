@@ -68,7 +68,7 @@ if ($('#modal-cms-ids').length) {
                 var self = this;
 
                 self.page = page;
-                self.getForms();
+                self.getRecords();
             },
 
             getRecords: function () {
@@ -81,7 +81,7 @@ if ($('#modal-cms-ids').length) {
 
                 self.loading = true;
 
-                url += '/page/' + self.page;
+                url += '/page/' + self.page + '/count/' + self.count;
 
                 // Handle Searches
                 if (search) {
