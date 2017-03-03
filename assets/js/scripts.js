@@ -4,29 +4,6 @@ $(function ($) {
     /**
      * CMS ids component
      */
-    /*
-    $('.cms-ids').on('click', '.btn-add', function (e) {
-        var $btn = $(this),
-            $tr = $btn.closest('tr'),
-            $table = $tr.closest('table'),
-            $frag = $('<tr></tr>');
-
-
-		$('.no-records', $table).remove();
-
-        $('th', $table).each(function () {
-            $frag.append('<td></td>');
-        });
-
-        var $btn = $('.cms-ids .btn-add:first').clone();
-        $btn.removeClass('btn-success btn-add').addClass('btn-danger btn-remove');
-        $('.glyphicon', $btn).removeClass('glyphicon-plus').addClass('glyphicon-minus');
-        $('td:last', $frag).append($btn).addClass('text-right');
-
-        $('tbody', $table).append($frag);
-    });
-    */
-
 	$('#modal-cms-ids').on('show.bs.modal', function (e) {
 		cms.modal = $(e.relatedTarget).closest('.cms-ids');
 	});
@@ -61,7 +38,7 @@ $(function ($) {
         });
     });
 
-    //Make diagnosis table sortable
+    // Make diagnosis table sortable
 	if ($.fn.sortable) {
         $(".cms-ids .table-items > tbody").sortable({
             classes: {
@@ -77,9 +54,7 @@ $(function ($) {
 
                 return $helper;
             },
-			beforeStop: function () {
-            	console.log($(this).parent().html());
-			},
+			beforeStop: function () {},
             stop: function (event, ui) {
             	var $component = $(this).closest('.cms-ids'),
 					$table = $('.table-items', $component),
@@ -94,6 +69,7 @@ $(function ($) {
         }).disableSelection();
     }
 
+
 	/**
 	 * Data entry helpers.
 	 */
@@ -105,6 +81,7 @@ $(function ($) {
 	$("input[data-column-type='time']").timepicker( { timeFormat: 'HH:mm:ss', timeOnly: true } );
 	$("input[data-column-type='year']").mask("9999");
 
+
 	/**
 	 * Schema editing.
 	 */
@@ -113,6 +90,7 @@ $(function ($) {
 		$(this).val($(this).val().replace(/ /g,'_')).change();
 		$(this).val($(this).val().toLowerCase());
 	});
+
 	$("form.cms-schema .btn-add-column").click(function() {
 		var $tr = $(this).parents("form").find("table.column-definitions tr:last");
 		var $newTr = $tr.clone();
@@ -124,15 +102,23 @@ $(function ($) {
 			var oldName = $(this).attr("name");
 			var newName = oldName.replace(/columns\[.*\]\[(.*)\]/, "columns["+colNum+"][$1]");
 			$(this).attr("name", newName);
+
+			if ($(this).attr('size') == '30') {
+				$(this).attr('size', 6);
+			}
 		});
 		$tr.after($newTr);
 		$newTr.find("[name*=name]").focus();
 	});
+
 	$(document).on('change', "form.cms-schema select[name*='xtype']", function() {
 		var xtype = $(this).val();
 		var $size = $(this).parents("tr").find("input[name*='size']");
 		var $targetTable = $(this).parents("tr").find("select[name*='target_table']");
 		var $autoInc = $(this).parents("tr").find("input[name='auto_increment']");
+
+		$size.attr('size', 6);
+
 		if (xtype === 'fk') {
 			$size.prop("disabled", true);
 			$targetTable.prop("disabled", false).prop("required", true);
@@ -161,6 +147,10 @@ $(function ($) {
 			$size.prop("disabled", true);
 			$targetTable.prop("disabled", true);
 			$autoInc.prop("disabled", true);
+		} else if (xtype === 'enum' || xtype === 'set') {
+			$size.attr('size', 30).prop("disabled", false);
+			$targetTable.prop("disabled", true);
+			$autoInc.prop("disabled", true);
 		} else if (xtype === 'point') {
 			$size.prop("disabled", true);
 			$targetTable.prop("disabled", true);
@@ -171,16 +161,22 @@ $(function ($) {
 			$autoInc.prop("disabled", true);
 		}
 	});
+
 	$("form.cms-schema select[name*='xtype']").change();
-	$("form.cms-schema a.move").click(function() {
+
+	$('form.cms-schema').on('click', 'a.move', function() {
 		var $tr = $(this).parents("tr");
+
 		$tr.hide();
+
 		if ($(this).hasClass("move-up")) {
 			$tr.prev("tr").before($tr);
 		}
+
 		if ($(this).hasClass("move-down")) {
 			$tr.next("tr").after($tr);
 		}
+
 		$tr.show("slow");
 	});
 
@@ -189,6 +185,7 @@ $(function ($) {
 	 * Make sure .disabled buttons are properly disabled.
 	 */
 	$("button.disabled").prop("disabled", true);
+
 
 	/**
 	 * Set up the bits that use WP_API.
@@ -213,6 +210,7 @@ $(function ($) {
 				$("#cms-quick-jump").append($li);
 			}
 		});
+
 		// Show the table list.
 		$("#cms-quick-jump label").click(function(event) {
 			event.preventDefault();
@@ -226,12 +224,14 @@ $(function ($) {
 				$quickJump.find("li[class!='filter']").hide();
 			}
 		});
+
 		// Close the table list by clicking anywhere else.
 		$(document).click(function(e) {
 			if ($(e.target).parents('#cms-quick-jump').length == 0) {
 				$('#cms-quick-jump.expanded label').click();
 			}
 		});
+
 		// Filter the table list.
 		$("#cms-quick-jump input").keyup(function() {
 			var s = $(this).val().toLowerCase();
@@ -317,8 +317,10 @@ $(function ($) {
 			$oldFilter.replaceWith($newFilter);
 		}
 	});
+
 	// Fire change manually.
 	$(".cms-filters select[name*='operator']").change();
+
 	// Change the form method depending on the filter size.
 	$(".cms-filters").on("change", "textarea", function(){
 		if ($(this).val().split(/\r*\n/).length > 50) {
@@ -329,8 +331,10 @@ $(function ($) {
 			$(this).parents("form").attr("method", "get");
 		}
 	});
+
 	// Fire keyup manually.
 	$(".cms-filters textarea").change();
+
 	// Change the controller, action, and page num of the form depending on which button was clicked.
 	$(".cms-filters button").click(function(e) {
 		$(this).parents("form").find("input[name='controller']").val($(this).data("controller"));
@@ -347,14 +351,17 @@ $(function ($) {
 	$copiedCell = $(".cms-grants td.capabilities:first").clone();
 	$copiedCell.find("input").attr("name", "");
 	$copiedCell.find("input").removeAttr("checked");
+
 	// For each select-all cell in the top row.
 	$(".cms-grants tr.select-all td.target").each(function(){
 		$(this).html($copiedCell.html());
 	});
+
 	// For each select-all cell in the left column.
 	$(".cms-grants td.select-all").each(function(){
 		$(this).html($copiedCell.html());
 	});
+
 	// Change the colour of checked boxen.
 	$("form.cms-grants label.checkbox input").on('change', function() {
 		if ($(this).prop("checked")) {
@@ -363,6 +370,7 @@ $(function ($) {
 			$(this).closest("label").removeClass("checked")
 		}
 	}).change();
+
 	// Handle the en masse checking and un-checking from the top row.
 	$("tr.select-all input").click(function() {
 		colIndex = $(this).closest("td").index() + 1;
@@ -371,6 +379,7 @@ $(function ($) {
 		$boxen = $cells.find("input[data-capability='" + capability + "']");
 		$boxen.prop("checked", $(this).prop("checked")).change();
 	});
+
 	// Handle the en masse checking and un-checking from the left column.
 	$("td.select-all input").click(function() {
 		rowIndex = $(this).closest("tr").index() + 1;
@@ -418,7 +427,5 @@ $(function ($) {
 			$formField.val(wkt);
 		}
 	});
-
 });
 })(jQuery);
-

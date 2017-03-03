@@ -18,7 +18,7 @@ use WordPress\CMS\DB\Table;
  */
 class ApiController extends ControllerBase {
 
-  protected $validTables = ['classes', 'programs'];
+  protected $validTables = ['classes', 'programs', 'topics'];
 
 	/**
 	 * Register the API routes for Cms.

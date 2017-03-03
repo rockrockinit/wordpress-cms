@@ -163,8 +163,10 @@ if ($('#modal-cms-ids').length) {
                                 var id = record.id,
                                     $frag = $('<tr data-id="' + id + '"></tr>'),
                                     $ids = $('.ids', $component),
-                                    ids = $ids.val().split(/,|\|/),
+                                    ids = $ids.val(),
                                     index = ids.indexOf(String(id));
+
+                                ids = ids ? ids.split(/,|\|/) : [];
 
                                 $('th', $table).each(function () {
                                     var column = $(this).data('column'),
