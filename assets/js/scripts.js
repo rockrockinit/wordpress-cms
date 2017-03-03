@@ -5,7 +5,15 @@ $(function ($) {
      * CMS ids component
      */
 	$('#modal-cms-ids').on('show.bs.modal', function (e) {
+		var $modal = $(this);
+
 		cms.modal = $(e.relatedTarget).closest('.cms-ids');
+
+		if ($('.status-results', $modal).length) {
+            $('[type="checkbox"]:checked').prop('checked', false);
+		} else {
+            $('.btn-search', $modal).trigger('click');
+		}
 	});
 
     $('.cms-ids').on('click', '.btn-remove', function (e) {
