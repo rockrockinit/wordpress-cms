@@ -429,34 +429,22 @@ class Table {
 	 * @param boolean $save_sql Whether to store the SQL for later use.
 	 * @return \WordPress\CMS\DB\Record[]
 	 */
-	public function get_records( $with_pagination = true, $save_sql = false , $search = '') {
+	public function get_records($with_pagination = true, $save_sql = false,  $sql = '') {
+		$override = $sql ? true : false;
+
 		// Build basic SELECT statement.
-		$sql = 'SELECT ' . $this->columns_sql_select() . ' FROM `' . $this->get_name() . '`';
-
-		// Search
-		if ($search) {
-			$search = $this->database->get_wpdb()->_escape($search);
-
-			foreach ( $this->get_columns() as $col_name => $col ) {
-				if (!preg_match('/_ids$/i', $col_name)) {
-					$where = !$where ? ' WHERE ' : ' OR ';
-					$sql .= $where . $col_name . ' LIKE \'%' . $search . '%\'';
-				}
-			}
-		}
-
-		$sql .= ' ';
+		$sql = !$sql ? 'SELECT ' . $this->columns_sql_select() . ' FROM `' . $this->get_name() . '`' : $sql;
 
 		// Ordering.
-		if ( false !== $this->get_order_by() ) {
-			$order_by = $this->get_column( $this->get_order_by() );
-			if ( $order_by ) {
-				$order_by_join = $this->join_on( $order_by );
+		if (!$override && false !== $this->get_order_by()) {
+			$order_by = $this->get_column($this->get_order_by());
+			if ($order_by) {
+				$order_by_join = $this->join_on($order_by);
 				$sql .= $order_by_join['join_clause'] . ' ORDER BY ' . $order_by_join['column_alias'] . ' ' . $this->get_order_dir();
 			}
 		}
 
-		$params = $this->apply_filters( $sql );
+		$params = $this->apply_filters($sql);
 
 		// Then limit to the ones on the current page.
 		if ( $with_pagination ) {

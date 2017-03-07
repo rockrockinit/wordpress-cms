@@ -11,8 +11,7 @@ if ($('#modal-cms-ids').length) {
             loading: false,
             pages: undefined,
             records: undefined,
-            columns: undefined,
-            hashes: []
+            columns: undefined
         },
 
         watch: {

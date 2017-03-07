@@ -11,6 +11,8 @@ namespace WordPress\CMS\Controllers;
 use WordPress\CMS\DB\Database;
 use WordPress\CMS\DB\Grants;
 use WordPress\CMS\DB\Table;
+use WordPress\CMS\Utils\UrlUtils;
+use WordPress\CMS\Utils\Utils;
 
 /**
  * This controller is different from the others in that it is not called via the
@@ -41,7 +43,7 @@ class ApiController extends ControllerBase {
 		) );
 
 		// Ex: /wp-json/cms/get/classes
-    register_rest_route( CMS_SLUG, '/get/(?P<table>[a-zA-Z0-9-_]+)((/page/(?P<page>\d+))|(/count/(?P<count>\d+))|(/search/(?P<search>.*)))*', array(
+    register_rest_route( CMS_SLUG, '/get/(?P<table>[a-zA-Z0-9-_]+)(?P<params>.*)?', array(
       'methods' => 'GET',
       'callback' => array( $this, 'get' ),
     ) );
@@ -55,15 +57,31 @@ class ApiController extends ControllerBase {
    * @return array
    */
 	public function get ($data) {
+		$page = 1;
+		$count = false;
+		$search = '';
+		$sort = '';
+		$debug = false;
+
 	  $out = [
 	    'successes' => [],
       'errors' => []
     ];
 
+		$params = isset($data['params']) ? $data['params'] : '';
+		$params = UrlUtils::uriToArray($params, true);
+
+		$locals = Utils::trimExplode(',', 'page, search, count, sort, debug');
+
     $name = $data['table'];
-    $page = $data['page'];
-    $count = $data['count'];
-		$search = $data['search'];
+
+		foreach ($params as $key => $value) {
+			if (in_array($key, $locals)) {
+				$$key = $params[$key];
+			} else {
+
+			}
+		}
 
     $page = $page ? $page : 1;
 
@@ -90,16 +108,107 @@ class ApiController extends ControllerBase {
 
       $tbl->page($page);
 
-      $tbl->get_records(true, true, $search);
+			// get_records($with_pagination = true, $save_sql = false , $search = '', $sql = '')
+      //$tbl->get_records(true, true, $search);
+			$sql = "SELECT * FROM `{$name}` ";
+
+			$where = '';
+
+			foreach ($params as $key => $value) {
+				if (!in_array($key, $locals)) {
+					$values = Utils::trimExplode(',', $value);
+
+					$where .= " AND\n(";
+
+					$where2 = '';
+
+					foreach ($values as $val) {
+						$val = $this->wpdb->_escape($val);
+
+						if (preg_match('/_ids$/i', $key)) {
+$where2 .= "
+\tOR\n\t(
+\t\t{$key} = '{$val}'
+\t\tOR
+\t\t{$key} LIKE '{$val},%'
+\t\tOR
+\t\t{$key} LIKE '%,{$val},%'
+\t\tOR
+\t\t{$key} LIKE '%,{$val}'
+\t)";
+						} else {
+							$where2 .= "OR {$key} LIKE '%{$val}%' ";
+						}
+					}
+
+					$where2 = trim($where2);
+					$where2 = preg_replace('/^(OR|AND)/i', "\n\t", $where2);
+
+					$where .= "{$where2}\n)\n";
+				}
+			}
+
+			$where = trim($where);
+
+			// Search
+			if ($search) {
+				$search = $this->wpdb->_escape($search);
+
+				$columns = $tbl->get_columns();
+
+				$where .= !$where ?  " \nWHERE\n(" : " \nAND\n(";
+
+				$where2 = '';
+
+				foreach ($columns as $col_name => $col) {
+					if (!preg_match('/_ids$/i', $col_name)) {
+						$where2 .= "\tOR\n\t{$col_name} LIKE '%{$search}%'\n";
+					}
+				}
+
+				$where2 = trim($where2);
+				$where2 = preg_replace('/^(OR|AND)/i', '', $where2);
+
+				$where .= "{$where2}\n)\n";
+			}
+
+			$sql .= ' ';
+
+
+			if ($where) {
+				$where = preg_replace('/^(OR|AND)/i', 'WHERE', $where);
+			}
+
+			$sql .= $where;
+
+			if ($sort) {
+				$sql .= "\nORDER BY {$sort}";
+			}
+
+			if ($debug) {
+				die($sql);
+			}
+
+			$tbl->get_records(true, true, $sql);
 
       $records = $this->wpdb->last_result;
+
+			// Get total & Cache
+			$sql = preg_replace('/SELECT \*/', 'SELECT COUNT(*)', $sql);
+
+			$key = md5($sql);
+
+			if (false === ($total = get_transient($key))) {
+				$total = $this->wpdb->get_var($sql, 0, 0);
+				set_transient($key, $total, 1 * HOUR_IN_SECONDS);
+			}
 
       $out['successes'][] = (object) [
         'records' => $records,
         'page' => intval($tbl->page()),
         'pages' => intval($tbl->get_page_count()),
         'count' => intval($tbl->get_records_per_page()),
-        'total' => intval($tbl->count_records())
+        'total' => intval($total)
       ];
     }
 

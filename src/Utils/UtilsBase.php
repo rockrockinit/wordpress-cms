@@ -374,6 +374,72 @@ class UtilsBase
     }
 
     /**
+     * Converts an array of strings or objects to an associative array.
+     *
+     * <code>
+     *      Utils::arrayToAssoc(array('first_name','Ed','last_name','Rodriguez'));
+     *      // array('first_name'=>'Ed','last_name'=>'Rodriguez');
+     *
+     *      Utils::arrayToAssoc($objs, 'id');
+     *      // array('(id)1'=>$obj1, '(id)2'=>$obj2);
+     * </code>
+     *
+     * @param array [$array=array()] The array to convert
+     * @param mixed [$value=0] Either a boolean decode value or an object string prop
+     * @return array An associative array
+     */
+    public static function arrayToAssoc($array=array(), $value=0)
+    {
+        if (is_array($array)) {
+            if (is_bool($value) || is_numeric($value)) {
+                $decode = self::getBool($value);
+            } else if(is_string($value)) {
+                $prop = $value;
+            }
+
+            // ARRAY OF STRING
+            if (isset($decode)) {
+                $array2 = array();
+                $count = 1;
+
+                foreach ($array as $value) {
+                    if (is_string($value)) {
+                        if ($decode) {
+                            $value = urldecode($value);
+                        }
+
+                        if ($count % 2 == 1) {
+                            $key = $value;
+                            $count = 1;
+                        } else {
+                            $array2[$key] = $value;
+                        }
+
+                        $count++;
+                    }
+                }
+
+                return $array2;
+
+                // ARRAY OF OBJECTS
+            } else if (isset($prop)) {
+
+                $assoc = array();
+
+                foreach ($array as $item) {
+                    if (isset($item->{$prop})) {
+                        $assoc[$item->{$prop}] = $item;
+                    }
+                }
+
+                return $assoc;
+            }
+        }
+
+        return array();
+    }
+
+    /**
      * Sorts an array of objects and associative arrays by the specified property name or path
      *
      * @param array $array The array to sort

@@ -9,6 +9,7 @@
 namespace WordPress\CMS\Models;
 
 use \WordPress\CMS\Utils\UrlUtils;
+use WordPress\CMS\Utils\Utils;
 
 class BaseModel
 {
@@ -28,11 +29,13 @@ class BaseModel
     return $results;
   }
 
-  public function _get ($value = '')
+  public function _get($value = '')
   {
     global $wpdb;
 
+    $rows = [];
     $row = null;
+    $url = false;
 
     if ($this->table) {
       if (!$value && $this->slug && isset($_GET[$this->slug])) {
@@ -41,28 +44,40 @@ class BaseModel
 
       if (!$value) {
         $value = UrlUtils::getSegment(-1);
+
+        $url = true;
       }
 
       if ($value) {
-        if (is_numeric($value)) {
+        if (is_array($value)) {
+          $ids = $value;
+        } else if (is_numeric($value)) {
           $sql = "SELECT * FROM {$this->table} WHERE id = '{$value}' LIMIT 1;";
           $rows = $wpdb->get_results($sql);
-          $row = $rows ? $rows[0] : $row;
         } else if (is_string($value)) {
-          $value = preg_replace('/^' . $this->prefix . '/i', '', $value);
-          $value = preg_replace('/-/i', ' ', $value);
-          $value = $wpdb->_escape($value);
+          if ($url) {
+            $value = $wpdb->_escape($value);
 
-          $sql = "SELECT * FROM {$this->table} WHERE name = '{$value}' LIMIT 1;";
+            if (is_numeric($value)) {
+              $sql = "SELECT * FROM {$this->table} WHERE id = '{$value}' LIMIT 1;";
+            } else {
+              $sql = "SELECT * FROM {$this->table} WHERE vanity = '{$value}' LIMIT 1;";
+            }
 
-          $rows = $wpdb->get_results($sql);
-          $row = $rows ? $rows[0] : $row;
+            $rows = $wpdb->get_results($sql);
+          } else {
+            $ids = Utils::trimExplode('/,|\|/', $value);
+
+            $sql = "SELECT * FROM {$this->table} WHERE id IN ('" . implode("','", $ids) . "');";
+
+            $rows = $wpdb->get_results($sql);
+          }
         }
       }
 
-      $row->classes = [];
+      foreach ($rows as $row) {
+        $row->classes = [];
 
-      if ($row) {
         $columns = get_object_vars($row);
         $columns = array_keys($columns);
 
@@ -95,7 +110,9 @@ class BaseModel
       }
     }
 
-    return $row;
+    $response = $rows && count($rows) > 1 ? $rows : $rows[0];
+
+    return $response;
   }
 
   public function _all($order = 'name ASC')

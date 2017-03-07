@@ -45,11 +45,12 @@ class Menus {
 	 * @return void
 	 */
 	public function init() {
-		add_action( 'init', array( $this, 'dispatch' ) );
-		add_action( 'admin_menu', array( $this, 'add_menu_pages' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
-		//add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
-		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ) );
+		add_action('init', array($this, 'dispatch'));
+		add_action('admin_menu', array($this, 'add_menu_pages'));
+		add_action('wp_enqueue_scripts', array($this, 'enqueue_global'));
+		add_action('admin_enqueue_scripts', array($this, 'enqueue_global'));
+		add_action('admin_enqueue_scripts', array($this, 'enqueue_admin'));
+		add_action('admin_bar_menu', array($this, 'admin_bar_menu'));
 	}
 
 	/**
@@ -156,7 +157,7 @@ class Menus {
 	 * @param string $page The current page name.
 	 * @return void
 	 */
-	public function enqueue( $page ) {
+	public function enqueue_admin( $page ) {
 
 		$allowed_pages = array(
 			'index.php', // For the Dashboard widget.
@@ -229,13 +230,26 @@ class Menus {
       $deps[] = $slug;
       $count++;
     }
+	}
 
-		// Javascript page variables
+	public function enqueue_global() {
+		$slug = CMS_SLUG . '-global';
+
+		$url = plugins_url(CMS_SLUG) . '/assets/js/global.js';
+
+		// Register the script
+		wp_register_script($slug, $url);
+
+		// Localize the script with new data
 		$vars = [
 			'admin_url' => admin_url() . 'admin.php?page=' . CMS_SLUG,
 			'plugin_url' => plugins_url(CMS_SLUG),
 			'site_url' => site_url()
 		];
-		wp_localize_script( 'cms-js'. count($pathes_js), 'cms', $vars );
+
+		wp_localize_script($slug, 'cms', $vars);
+
+		// Enqueued script with localized data
+		wp_enqueue_script($slug, $url, array(), CMS_VERSION, true);
 	}
 }

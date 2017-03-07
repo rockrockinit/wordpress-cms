@@ -18,17 +18,4 @@ class WpUtils extends UtilsBase
 
     return $rows;
   }
-
-  public static function getPageLink ($slug, $suffix = '') {
-    $type = 'page';
-    $post = get_page_by_path($slug, OBJECT, $type);
-    $link = get_permalink($post->ID);
-
-    if ($suffix) {
-      $suffix = self::slug('-'.$suffix);
-      $link = preg_replace('/\/$/', $suffix . '/', $link);
-    }
-
-    return $link;
-  }
 }
