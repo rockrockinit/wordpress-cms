@@ -29,7 +29,7 @@ class BaseModel
     return $results;
   }
 
-  public function _get($value = '')
+  public function _get($value = '', $ids_tables = [])
   {
     global $wpdb;
 
@@ -39,7 +39,7 @@ class BaseModel
 
     if ($this->table) {
       if (!$value && $this->slug && isset($_GET[$this->slug])) {
-        $value = $_GET[$slug];
+        $value = $_GET[$this->slug];
       }
 
       if (!$value) {
@@ -75,9 +75,57 @@ class BaseModel
         }
       }
 
-      foreach ($rows as $row) {
-        $row->classes = [];
+      $rows = $this->ids_columns($rows);
 
+
+
+      if ($ids_tables) {
+        $ids_tables = Utils::trimExplode(',', $ids_tables);
+
+        $rows = $this->ids_tables($rows, $ids_tables);
+      }
+    }
+
+    $response = $rows && count($rows) > 1 ? $rows : $rows[0];
+
+    return $response;
+  }
+
+  public function ids_tables($rows = [], $tables = [])
+  {
+    global $wpdb;
+
+    if (is_array($rows) && $rows && is_array($tables) && $tables) {
+      $column = $this->table . '_ids';
+
+      foreach ($rows as &$row) {
+        $id = $row->id;
+
+        foreach ($tables as $table) {
+          $row->{$table} = [];
+
+          $sql = "SELECT * FROM {$table} WHERE {$column} = '{$id}' OR {$column} LIKE '{$id},%' OR {$column} LIKE '%,{$id},%' OR {$column} LIKE '%,{$id}';";
+
+          $rows2 = $wpdb->get_results($sql);
+
+          // Takes into account ordering
+          if ($rows2) {
+            $row->{$table} = $rows2;
+          }
+
+        }
+      }
+    }
+
+    return $rows;
+  }
+
+  public function ids_columns($rows = [])
+  {
+    global $wpdb;
+
+    if (is_array($rows)) {
+      foreach ($rows as &$row) {
         $columns = get_object_vars($row);
         $columns = array_keys($columns);
 
@@ -99,7 +147,7 @@ class BaseModel
                 foreach ($ids as $id) {
                   foreach ($rows2 as $row2) {
                     if ($row2->id == $id) {
-                      $row->classes[] = $row2;
+                      $row->{$table2}[] = $row2;
                     }
                   }
                 }
@@ -110,9 +158,7 @@ class BaseModel
       }
     }
 
-    $response = $rows && count($rows) > 1 ? $rows : $rows[0];
-
-    return $response;
+    return $rows;
   }
 
   public function _all($order = 'name ASC')
@@ -126,39 +172,7 @@ class BaseModel
 
       $rows = $wpdb->get_results($sql);
 
-      foreach ($rows as &$row) {
-        if ($row) {
-          $columns = get_object_vars($row);
-          $columns = array_keys($columns);
-
-          foreach ($columns as $column) {
-            if (preg_match('/_ids$/i', $column)) {
-              $table2 = preg_replace('/_ids$/i', '', $column);
-
-              $row->{$table2} = [];
-
-              if ($row->{$column}) {
-                $ids = explode(',', $row->{$column});
-
-                if ($ids) {
-                  $sql = "SELECT * FROM {$table2} WHERE id IN ('" . implode("','", $ids) . "')";
-
-                  $rows2 = $wpdb->get_results($sql);
-
-                  // Takes into account ordering
-                  foreach ($ids as $id) {
-                    foreach ($rows2 as $row2) {
-                      if ($row2->id == $id) {
-                        $row->{$table2}[] = $row2;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      $rows = $this->ids_columns($rows);
     }
 
     return $rows;
