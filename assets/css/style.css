@@ -6,11 +6,16 @@
 }
 .cms-ids .ui-sortable-helper {
     width: auto !important;
+    color: #94d9ff;
 }
 .cms-ids .ui-sortable-helper,
 .cms-ids .ui-sortable-helper td {
     border: none !important;
     background: #fffeda !important;
+}
+/* Hides summernote/wordpress css conflict */
+.note-popover {
+    display: none;
 }
 form.cms-filters td { vertical-align:top }
 form.cms-filters td.label { text-align:right }

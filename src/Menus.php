@@ -169,7 +169,9 @@ class Menus {
 			'cms_page_cms_schema',
 		);
 
-		if (!( empty( $page ) || in_array( $page, $allowed_pages, true ))) {
+		//die('<pre>' . print_r($page, 1) . '</pre>');
+
+		if (!(empty( $page ) || in_array( $page, $allowed_pages, true ))) {
 			return;
 		}
 
